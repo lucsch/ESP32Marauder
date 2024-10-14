@@ -6,3 +6,6 @@ esp32_marauder/.vscode/settings.json
 
 MarauderOTA_PIO/.pio
 MarauderOTA_PIO/.idea
+
+esp32_marauder_pio/.pio
+esp32_marauder_pio/.idea
