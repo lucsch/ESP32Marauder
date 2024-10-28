@@ -12,3 +12,5 @@ esp32_marauder_pio/.idea
 
 TestFile/pio/.pio
 TestFile/pio/.idea
+
+schematics/ch340/ch340_test-backups/*.zip
