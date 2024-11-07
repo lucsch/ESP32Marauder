@@ -1,5 +1,5 @@
 //
-// Created by Lucien Schreiber on 03.11.2024.
+// Created by LSC on 03.11.2024.
 //
 #include "Arduino.h"
 #include "Adafruit_NeoPixel.h"
