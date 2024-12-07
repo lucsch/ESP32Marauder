@@ -16,3 +16,5 @@ TestFile/pio/.idea
 schematics/ch340/ch340_test-backups/*.zip
 schematics/esp32v6/esp32v6-backups/*.zip
 fp-info-cache
+
+*.FCBak
