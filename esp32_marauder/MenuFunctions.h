@@ -74,6 +74,10 @@ extern Settings settings_obj;
 #define DISABLE_TOUCH 34
 #define FLIPPER 35
 #define BLANK 36
+#define PINESCAN_SNIFF 37 // Use blanks icon
+#define MULTISSID_SNIFF 37 // Use blanks icon
+#define JOINED 38
+#define FORCE 39
 
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
@@ -82,6 +86,7 @@ PROGMEM static lv_disp_buf_t disp_buf;
 PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
 
 PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
+PROGMEM static void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void html_list_cb(lv_obj_t * btn, lv_event_t event);
 PROGMEM static void ap_list_cb(lv_obj_t * btn, lv_event_t event);
@@ -161,18 +166,20 @@ class MenuFunctions
 
     // WiFi menu stuff
     Menu wifiSnifferMenu;
+    Menu wifiScannerMenu;
     Menu wifiAttackMenu;
     #ifdef HAS_GPS
       Menu wardrivingMenu;
     #endif
     Menu wifiGeneralMenu;
     Menu wifiAPMenu;
+    Menu wifiIPMenu;
     #ifdef HAS_BT
       Menu airtagMenu;
     #endif
-    #ifndef HAS_ILI9341
+    //#ifndef HAS_ILI9341
       Menu wifiStationMenu;
-    #endif
+    //#endif
 
     // WiFi General Menu
     Menu htmlMenu;
@@ -181,6 +188,7 @@ class MenuFunctions
     Menu genAPMacMenu;
     Menu cloneAPMacMenu;
     Menu setMacMenu;
+    Menu selectProbeSSIDsMenu;
 
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
@@ -193,7 +201,7 @@ class MenuFunctions
 
     // Menu icons
 
-
+    void displayMenuButtons();
     uint16_t getColor(uint16_t color);
     void drawAvgLine(int16_t value);
     void drawMaxLine(int16_t value, uint16_t color);
@@ -211,11 +219,9 @@ class MenuFunctions
     void displaySetting(String key, Menu* menu, int index);
     void buttonSelected(int b, int x = -1);
     void buttonNotSelected(int b, int x = -1);
-    #if (!defined(HAS_ILI9341) && defined(HAS_BUTTONS))
-      void miniKeyboard(Menu * targetMenu);
-    #endif
-
-    uint8_t updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold = 600);
+    //#if (!defined(HAS_ILI9341) && defined(HAS_BUTTONS))
+      String miniKeyboard(Menu * targetMenu, bool do_pass = false);
+    //#endif
 
   public:
     MenuFunctions();
@@ -249,6 +255,7 @@ class MenuFunctions
 
     String loaded_file = "";
 
+    void joinWiFiGFX(String essid);
     void setGraphScale(float scale);
     void initLVGL();
     void deinitLVGL();

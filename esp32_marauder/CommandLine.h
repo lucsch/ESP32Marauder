@@ -34,6 +34,7 @@ extern LinkedList<AccessPoint>* access_points;
 extern LinkedList<AirTag>* airtags;
 extern LinkedList<ssid>* ssids;
 extern LinkedList<Station>* stations;
+extern LinkedList<IPAddress>* ipList;
 extern const String PROGMEM version_number;
 extern const String PROGMEM board_target;
 
@@ -63,11 +64,15 @@ const char PROGMEM SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM SNIFF_PROBE_CMD[] = "sniffprobe";
 const char PROGMEM SNIFF_PWN_CMD[] = "sniffpwn";
+const char PROGMEM SNIFF_PINESCAN_CMD[] = "sniffpinescan";
+const char PROGMEM SNIFF_MULTISSID_CMD[] = "sniffmultissid";
 const char PROGMEM SNIFF_ESP_CMD[] = "sniffesp";
 const char PROGMEM SNIFF_DEAUTH_CMD[] = "sniffdeauth";
 const char PROGMEM SNIFF_PMKID_CMD[] = "sniffpmkid";
 const char PROGMEM STOPSCAN_CMD[] = "stopscan";
 const char PROGMEM WARDRIVE_CMD[] = "wardrive";
+const char PROGMEM PING_CMD[] = "pingscan";
+const char PROGMEM PORT_SCAN_CMD[] = "portscan";
 
 // WiFi attack
 const char PROGMEM ATTACK_CMD[] = "attack";
@@ -83,6 +88,7 @@ const char PROGMEM SEL_CMD[] = "select";
 const char PROGMEM SSID_CMD[] = "ssid";
 const char PROGMEM SAVE_CMD[] = "save";
 const char PROGMEM LOAD_CMD[] = "load";
+const char PROGMEM JOIN_CMD[] = "join";
 
 // Bluetooth sniff/scan
 const char PROGMEM BT_SPAM_CMD[] = "blespam";
@@ -121,11 +127,15 @@ const char PROGMEM HELP_SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM HELP_SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM HELP_SNIFF_PROBE_CMD[] = "sniffprobe";
 const char PROGMEM HELP_SNIFF_PWN_CMD[] = "sniffpwn";
+const char PROGMEM HELP_SNIFF_PINESCAN_CMD[] = "sniffpinescan";
+const char PROGMEM HELP_SNIFF_MULTISSID_CMD[] = "sniffmultissid";
 const char PROGMEM HELP_SNIFF_ESP_CMD[] = "sniffesp";
 const char PROGMEM HELP_SNIFF_DEAUTH_CMD[] = "sniffdeauth";
 const char PROGMEM HELP_SNIFF_PMKID_CMD[] = "sniffpmkid [-c <channel>][-d][-l]";
-const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan";
+const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan [-f]";
 const char PROGMEM HELP_WARDRIVE_CMD[] = "wardrive [-s]";
+const char PROGMEM HELP_PING_CMD[] = "pingscan";
+const char PROGMEM HELP_PORT_SCAN_CMD[] = "portscan [-a] -t <ip index>";
 
 // WiFi attack
 const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-c]/[-s <src mac>] [-d <dst mac>]/probe/rickroll>";
@@ -135,12 +145,14 @@ const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
 const char PROGMEM HELP_LIST_AP_CMD_B[] = "list -a";
 const char PROGMEM HELP_LIST_AP_CMD_C[] = "list -c";
 const char PROGMEM HELP_LIST_AP_CMD_D[] = "list -t";
+const char PROGMEM HELP_LIST_AP_CMD_E[] = "list -i";
 const char PROGMEM HELP_INFO_CMD[] = "info [-a <index>]";
 const char PROGMEM HELP_SEL_CMD_A[] = "select -a/-s/-c <index (comma separated)>/-f \"equals <String> or contains <String>\"";
 const char PROGMEM HELP_SSID_CMD_A[] = "ssid -a [-g <count>/-n <name>]";
 const char PROGMEM HELP_SSID_CMD_B[] = "ssid -r <index>";
 const char PROGMEM HELP_SAVE_CMD[] = "save -a/-s";
 const char PROGMEM HELP_LOAD_CMD[] = "load -a/-s";
+const char PROGMEM HELP_JOIN_CMD[] = "join -a <index> -p <password>";
 
 // Bluetooth sniff/scan
 const char PROGMEM HELP_BT_SNIFF_CMD[] = "sniffbt [-t] <airtag/flipper>";
