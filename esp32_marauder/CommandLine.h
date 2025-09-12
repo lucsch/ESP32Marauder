@@ -35,6 +35,7 @@ extern LinkedList<AirTag>* airtags;
 extern LinkedList<ssid>* ssids;
 extern LinkedList<Station>* stations;
 extern LinkedList<IPAddress>* ipList;
+extern LinkedList<ProbeReqSsid>* probe_req_ssids;
 extern const String PROGMEM version_number;
 extern const String PROGMEM board_target;
 
@@ -55,6 +56,7 @@ const char PROGMEM NMEA_CMD[] = "nmea";
 
 // WiFi sniff/scan
 const char PROGMEM EVIL_PORTAL_CMD[] = "evilportal";
+const char PROGMEM KARMA_CMD[] = "karma";
 const char PROGMEM PACKET_COUNT_CMD[] = "packetcount";
 const char PROGMEM SIGSTREN_CMD[] = "sigmon";
 const char PROGMEM SCAN_ALL_CMD[] = "scanall";
@@ -73,6 +75,7 @@ const char PROGMEM STOPSCAN_CMD[] = "stopscan";
 const char PROGMEM WARDRIVE_CMD[] = "wardrive";
 const char PROGMEM PING_CMD[] = "pingscan";
 const char PROGMEM PORT_SCAN_CMD[] = "portscan";
+const char PROGMEM ARP_SCAN_CMD[] = "arpscan";
 
 // WiFi attack
 const char PROGMEM ATTACK_CMD[] = "attack";
@@ -80,6 +83,8 @@ const char PROGMEM ATTACK_TYPE_DEAUTH[] = "deauth";
 const char PROGMEM ATTACK_TYPE_BEACON[] = "beacon";
 const char PROGMEM ATTACK_TYPE_PROBE[] = "probe";
 const char PROGMEM ATTACK_TYPE_RR[] = "rickroll";
+const char PROGMEM ATTACK_TYPE_BM[] = "badmsg";
+const char PROGMEM ATTACK_TYPE_S[] = "sleep";
 
 // WiFi Aux
 const char PROGMEM LIST_AP_CMD[] = "list";
@@ -118,6 +123,7 @@ const char PROGMEM HELP_NMEA_CMD[] = "nmea";
 
 // WiFi sniff/scan
 const char PROGMEM HELP_EVIL_PORTAL_CMD[] = "evilportal [-c start [-w html.html]/sethtml <html.html>]";
+const char PROGMEM HELP_KARMA_CMD[] = "karma -p <index>";
 const char PROGMEM HELP_PACKET_COUNT_CMD[] = "packetcount";
 const char PROGMEM HELP_SIGSTREN_CMD[] = "sigmon";
 const char PROGMEM HELP_SCAN_ALL_CMD[] = "scanall";
@@ -136,9 +142,10 @@ const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan [-f]";
 const char PROGMEM HELP_WARDRIVE_CMD[] = "wardrive [-s]";
 const char PROGMEM HELP_PING_CMD[] = "pingscan";
 const char PROGMEM HELP_PORT_SCAN_CMD[] = "portscan [-a] -t <ip index>";
+const char PROGMEM HELP_ARP_SCAN_CMD[] = "arpscan [-f]";
 
 // WiFi attack
-const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-c]/[-s <src mac>] [-d <dst mac>]/probe/rickroll>";
+const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-c]/[-s <src mac>] [-d <dst mac>]/probe/rickroll/badmsg [-c]/sleep [-c]>";
 
 // WiFi Aux
 const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
@@ -146,13 +153,14 @@ const char PROGMEM HELP_LIST_AP_CMD_B[] = "list -a";
 const char PROGMEM HELP_LIST_AP_CMD_C[] = "list -c";
 const char PROGMEM HELP_LIST_AP_CMD_D[] = "list -t";
 const char PROGMEM HELP_LIST_AP_CMD_E[] = "list -i";
+const char PROGMEM HELP_LIST_AP_CMD_F[] = "list -p";
 const char PROGMEM HELP_INFO_CMD[] = "info [-a <index>]";
 const char PROGMEM HELP_SEL_CMD_A[] = "select -a/-s/-c <index (comma separated)>/-f \"equals <String> or contains <String>\"";
 const char PROGMEM HELP_SSID_CMD_A[] = "ssid -a [-g <count>/-n <name>]";
 const char PROGMEM HELP_SSID_CMD_B[] = "ssid -r <index>";
 const char PROGMEM HELP_SAVE_CMD[] = "save -a/-s";
 const char PROGMEM HELP_LOAD_CMD[] = "load -a/-s";
-const char PROGMEM HELP_JOIN_CMD[] = "join -a <index> -p <password>";
+const char PROGMEM HELP_JOIN_CMD[] = "join -a <index> -p <password>/-s";
 
 // Bluetooth sniff/scan
 const char PROGMEM HELP_BT_SNIFF_CMD[] = "sniffbt [-t] <airtag/flipper>";

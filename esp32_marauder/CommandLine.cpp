@@ -220,8 +220,10 @@ void CommandLine::runCommand(String input) {
     
     // WiFi sniff/scan
     Serial.println(HELP_EVIL_PORTAL_CMD);
+    Serial.println(HELP_KARMA_CMD);
     Serial.println(HELP_PACKET_COUNT_CMD);
     Serial.println(HELP_PING_CMD);
+    Serial.println(HELP_ARP_SCAN_CMD);
     Serial.println(HELP_PORT_SCAN_CMD);
     Serial.println(HELP_SIGSTREN_CMD);
     Serial.println(HELP_SCAN_ALL_CMD);
@@ -251,6 +253,7 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_LIST_AP_CMD_C);
     Serial.println(HELP_LIST_AP_CMD_D);
     Serial.println(HELP_LIST_AP_CMD_E);
+    Serial.println(HELP_LIST_AP_CMD_F);
     Serial.println(HELP_SEL_CMD_A);
     Serial.println(HELP_SSID_CMD_A);
     Serial.println(HELP_SSID_CMD_B);
@@ -327,6 +330,7 @@ void CommandLine::runCommand(String input) {
     #ifdef HAS_GPS
       if (gps_obj.getGpsModuleStatus()) {
         int get_arg = this->argSearch(&cmd_args, "-g");
+        int track_arg = this->argSearch(&cmd_args, "-t");
         int nmea_arg = this->argSearch(&cmd_args, "-n");
 
         if (get_arg != -1) {
@@ -382,6 +386,13 @@ void CommandLine::runCommand(String input) {
           }
           else
             Serial.println("You did not provide a valid argument");
+        }
+        else if (track_arg != -1) {
+          wifi_scan_obj.currentScanMode = GPS_TRACKER;
+          #ifdef HAS_SCREEN
+            menu_function_obj.changeMenu(&menu_function_obj.gpsInfoMenu);
+          #endif
+          wifi_scan_obj.StartScan(GPS_TRACKER, TFT_CYAN);
         }
         else if(cmd_args.size()>1)
           Serial.println("You did not provide a valid flag");
@@ -575,6 +586,37 @@ void CommandLine::runCommand(String input) {
         Serial.println("GPS not supported");
       #endif
     }
+    // Karma
+    else if (cmd_args.get(0) == KARMA_CMD) {
+      int pr_sw = this->argSearch(&cmd_args, "-p");
+
+      if (pr_sw == -1) {
+        Serial.println("You did not provide a target index");
+        return;
+      }
+
+      int pr_index = cmd_args.get(pr_sw + 1).toInt();
+
+      if ((pr_index < 0) || (pr_index > probe_req_ssids->size() - 1)) {
+        Serial.println("The provided index was not in range");
+        return;
+      }
+
+      if (evil_portal_obj.setAP(probe_req_ssids->get(pr_index).essid)) {
+        Serial.println("Starting Karma Attack with " + probe_req_ssids->get(pr_index).essid + ". Stop with " + (String)STOPSCAN_CMD);
+        #ifdef HAS_SCREEN
+          display_obj.clearScreen();
+          menu_function_obj.drawStatusBar();
+        #endif
+        wifi_scan_obj.StartScan(WIFI_SCAN_EVIL_PORTAL, TFT_ORANGE);
+        wifi_scan_obj.setMac();
+      }
+      else {
+        Serial.println("Unable to set AP ESSID");
+        return;
+      }
+
+    }
     // AP Scan
     else if (cmd_args.get(0) == EVIL_PORTAL_CMD) {
       int cmd_sw = this->argSearch(&cmd_args, "-c");
@@ -615,7 +657,15 @@ void CommandLine::runCommand(String input) {
           evil_portal_obj.setHtmlFromSerial();
         }
         else if (et_command == "setap") {
+          int target_ap_index = cmd_args.get(cmd_sw + 2).toInt();
+          if ((target_ap_index >= 0) && (target_ap_index < access_points->size())) {
+            evil_portal_obj.setAP(access_points->get(target_ap_index).essid);
+            AccessPoint new_ap = access_points->get(target_ap_index);
+            new_ap.selected = true;
+            access_points->set(target_ap_index, new_ap);
 
+            evil_portal_obj.ap_index = target_ap_index;
+          }
         }
       }
     }
@@ -822,6 +872,47 @@ void CommandLine::runCommand(String input) {
             #endif
             Serial.println("Starting Manual Deauthentication attack. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_MANUAL, TFT_RED);            
+          }
+        }
+        // Bad Msg
+        else if (attack_type == ATTACK_TYPE_BM) {
+          // Attack all
+          if (targ_sw == -1) {
+            Serial.println("Starting Bad Msg attack against all stations. Stop with " + (String)STOPSCAN_CMD);
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            wifi_scan_obj.StartScan(WIFI_ATTACK_BAD_MSG, TFT_RED);
+          }
+          // Target clients
+          else {
+            Serial.println("Starting targeted Bad Msg attack. Stop with " + (String)STOPSCAN_CMD);
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            wifi_scan_obj.StartScan(WIFI_ATTACK_BAD_MSG_TARGETED, TFT_YELLOW);
+          }
+        }
+        else if (attack_type == ATTACK_TYPE_S) {
+          // Attack all
+          if (targ_sw == -1) {
+            Serial.println("Starting Sleep attack against all stations. Stop with " + (String)STOPSCAN_CMD);
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            wifi_scan_obj.StartScan(WIFI_ATTACK_SLEEP, TFT_RED);
+          }
+          // Target clients
+          else {
+            Serial.println("Starting targeted Sleep attack. Stop with " + (String)STOPSCAN_CMD);
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            wifi_scan_obj.StartScan(WIFI_ATTACK_SLEEP_TARGETED, TFT_MAGENTA);
           }
         }
         // Beacon
@@ -1045,54 +1136,6 @@ void CommandLine::runCommand(String input) {
         }
       }
     }
-    /*else if (cmd_args.get(0) == BT_SOUR_APPLE_CMD) {
-      #ifdef HAS_BT
-        Serial.println("Starting Sour Apple attack. Stop with " + (String)STOPSCAN_CMD);
-        #ifdef HAS_SCREEN
-          display_obj.clearScreen();
-          menu_function_obj.drawStatusBar();
-        #endif
-        wifi_scan_obj.StartScan(BT_ATTACK_SOUR_APPLE, TFT_GREEN);
-      #else
-        Serial.println("Bluetooth not supported");
-      #endif
-    }
-    else if (cmd_args.get(0) == BT_SWIFTPAIR_SPAM_CMD) {
-      #ifdef HAS_BT
-        Serial.println("Starting Swiftpair Spam attack. Stop with " + (String)STOPSCAN_CMD);
-        #ifdef HAS_SCREEN
-          display_obj.clearScreen();
-          menu_function_obj.drawStatusBar();
-        #endif
-        wifi_scan_obj.StartScan(BT_ATTACK_SWIFTPAIR_SPAM, TFT_CYAN);
-      #else
-        Serial.println("Bluetooth not supported");
-      #endif
-    }
-    else if (cmd_args.get(0) == BT_SAMSUNG_SPAM_CMD) {
-      #ifdef HAS_BT
-        Serial.println("Starting Samsung Spam attack. Stop with " + (String)STOPSCAN_CMD);
-        #ifdef HAS_SCREEN
-          display_obj.clearScreen();
-          menu_function_obj.drawStatusBar();
-        #endif
-        wifi_scan_obj.StartScan(BT_ATTACK_SAMSUNG_SPAM, TFT_CYAN);
-      #else
-        Serial.println("Bluetooth not supported");
-      #endif
-    }
-    else if (cmd_args.get(0) == BT_SPAM_ALL_CMD) {
-      #ifdef HAS_BT
-        Serial.println("Starting BT Spam All attack. Stop with " + (String)STOPSCAN_CMD);
-        #ifdef HAS_SCREEN
-          display_obj.clearScreen();
-          menu_function_obj.drawStatusBar();
-        #endif
-        wifi_scan_obj.StartScan(BT_ATTACK_SPAM_ALL, TFT_MAGENTA);
-      #else
-        Serial.println("Bluetooth not supported");
-      #endif
-    }*/
     // Wardrive
     else if (cmd_args.get(0) == BT_WARDRIVE_CMD) {
       #ifdef HAS_BT
@@ -1182,10 +1225,23 @@ void CommandLine::runCommand(String input) {
       wifi_scan_obj.StartScan(WIFI_PING_SCAN, TFT_GREEN);
     }
 
+    if (cmd_args.get(0) == ARP_SCAN_CMD) {
+      Serial.println("Starting ARP Scan. Stop with " + (String)STOPSCAN_CMD);
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(WIFI_ARP_SCAN, TFT_CYAN);
+    }
+
     // Port Scan
     if (cmd_args.get(0) == PORT_SCAN_CMD) {
       int all_sw = this->argSearch(&cmd_args, "-a");
       int ip_sw = this->argSearch(&cmd_args, "-t");
+      int port_sw = this->argSearch(&cmd_args, "-p");
+
+      if (port_sw != -1)
+        int ip_index = cmd_args.get(ip_sw + 1).toInt();
 
       // Check they specified ip index
       if (ip_sw != -1) {
@@ -1210,6 +1266,9 @@ void CommandLine::runCommand(String input) {
           return;
         }
       }
+      else if (port_sw != -1) {
+        
+      }
       else {
         Serial.println("You did not specify an IP index");
         return;
@@ -1227,6 +1286,7 @@ void CommandLine::runCommand(String input) {
     int cl_sw = this->argSearch(&cmd_args, "-c");
     int at_sw = this->argSearch(&cmd_args, "-t");
     int ip_sw = this->argSearch(&cmd_args, "-i");
+    int pr_sw = this->argSearch(&cmd_args, "-p");
 
     // List APs
     if (ap_sw != -1) {
@@ -1244,6 +1304,12 @@ void CommandLine::runCommand(String input) {
     else if (ip_sw != -1) {
       for (int i = 0; i < ipList->size(); i++) {
         Serial.println("[" + (String)i + "] " + ipList->get(i).toString());
+      }
+    }
+    // List Probes
+    else if (pr_sw != -1) {
+      for (int i = 0; i < probe_req_ssids->size(); i++) {
+        Serial.println("[" + (String)i + "] " + probe_req_ssids->get(i).essid);
       }
     }
     // List SSIDs
@@ -1308,6 +1374,7 @@ void CommandLine::runCommand(String input) {
   else if (cmd_args.get(0) == JOIN_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a");
     int pw_sw = this->argSearch(&cmd_args, "-p");
+    int s_sw  = this->argSearch(&cmd_args, "-s");
 
     if ((ap_sw != -1) && (pw_sw != -1)) {
       int index = cmd_args.get(ap_sw + 1).toInt();
@@ -1321,6 +1388,20 @@ void CommandLine::runCommand(String input) {
           menu_function_obj.changeMenu(menu_function_obj.current_menu);
         #endif
       #endif
+    }
+    else if (s_sw != -1) {
+      String ssid = settings_obj.loadSetting<String>("ClientSSID");
+      String pw = settings_obj.loadSetting<String>("ClientPW");
+
+      if ((ssid != "") && (pw != "")) {
+        wifi_scan_obj.joinWiFi(ssid, pw, false);
+        #ifdef HAS_SCREEN
+          menu_function_obj.changeMenu(menu_function_obj.current_menu);
+        #endif
+      }
+      else {
+        Serial.println("There are no saved WiFi credentials");
+      }
     }
     else {
       Serial.println("You did not provide the proper args");

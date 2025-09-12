@@ -5,6 +5,10 @@
 
 #include "configs.h"
 
+#ifdef MARAUDER_CARDPUTER
+  #include "Keyboard.h"
+#endif
+
 #ifdef HAS_SCREEN
 
 #define BATTERY_ANALOG_ON 0
@@ -16,11 +20,21 @@
 
 #ifdef HAS_BUTTONS
   #include "Switches.h"
-  extern Switches u_btn;
-  extern Switches d_btn;
-  extern Switches l_btn;
-  extern Switches r_btn;
-  extern Switches c_btn;
+  #if (U_BTN >= 0)
+    extern Switches u_btn;
+  #endif
+  #if (D_BTN >= 0)
+    extern Switches d_btn;
+  #endif
+  #if (L_BTN >= 0)
+    extern Switches l_btn;
+  #endif
+  #if (R_BTN >= 0)
+    extern Switches r_btn;
+  #endif
+  #if (C_BTN >= 0)
+    extern Switches c_btn;
+  #endif
 #endif
 
 extern WiFiScan wifi_scan_obj;
@@ -151,6 +165,9 @@ class MenuFunctions
 
     Menu wifiMenu;
     Menu bluetoothMenu;
+    #ifdef HAS_GPS
+      Menu gpsMenu;   // H4W9 Added GPS Menu option to Main Menu
+    #endif
     Menu badusbMenu;
     Menu deviceMenu;
 
@@ -174,6 +191,7 @@ class MenuFunctions
     Menu wifiGeneralMenu;
     Menu wifiAPMenu;
     Menu wifiIPMenu;
+    Menu ssidsMenu;
     #ifdef HAS_BT
       Menu airtagMenu;
     #endif
@@ -196,6 +214,10 @@ class MenuFunctions
 
     // Settings things menus
     Menu generateSSIDsMenu;
+
+    Menu evilPortalMenu;
+
+    Menu gpsPOIMenu;
 
     static void lv_tick_handler();
 
@@ -222,6 +244,11 @@ class MenuFunctions
     //#if (!defined(HAS_ILI9341) && defined(HAS_BUTTONS))
       String miniKeyboard(Menu * targetMenu, bool do_pass = false);
     //#endif
+
+    #ifdef MARAUDER_CARDPUTER
+      Keyboard_Class M5CardputerKeyboard = Keyboard_Class();
+      bool isKeyPressed(char c);
+    #endif
 
   public:
     MenuFunctions();

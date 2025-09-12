@@ -28,6 +28,8 @@ void EvilPortal::setup() {
 }
 
 void EvilPortal::cleanup() {
+  this->ap_index = -1;
+
   #ifdef HAS_PSRAM
     free(index_html);
     index_html = nullptr;
@@ -35,8 +37,10 @@ void EvilPortal::cleanup() {
 }
 
 bool EvilPortal::begin(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_points) {
-  if (!this->setAP(ssids, access_points))
-    return false;
+  if (!this->has_ap) {
+    if (!this->setAP(ssids, access_points))
+      return false;
+  }
   if (!this->setHtml())
     return false;
     
@@ -71,6 +75,30 @@ void EvilPortal::setupServer() {
       #endif
     });
   #endif
+
+  const char* captiveEndpoints[] = {
+    "/hotspot-detect.html",
+    "/library/test/success.html",
+    "/success.txt",
+    "/generate_204",
+    "/gen_204",
+    "/ncsi.txt",
+    "/connecttest.txt",
+    "/redirect"
+  };
+
+  for (int i = 0; i < sizeof(captiveEndpoints) / sizeof(captiveEndpoints[0]); i++) {
+    
+    #ifndef HAS_PSRAM
+      server.on(captiveEndpoints[i], HTTP_GET, [this](AsyncWebServerRequest *request){
+        request->send_P(200, "text/html", index_html);
+      });
+    #else
+      server.on(captiveEndpoints[i], HTTP_GET, [this](AsyncWebServerRequest *request){
+        request->send(200, "text/html", index_html);
+      });
+    #endif
+  }
 
   server.on("/get-ap-name", HTTP_GET, [this](AsyncWebServerRequest *request) {
     request->send(200, "text/plain", WiFi.softAPSSID());
@@ -167,11 +195,13 @@ bool EvilPortal::setHtml() {
 
 bool EvilPortal::setAP(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_points) {
   // See if there are selected APs first
+  int targ_ap_index = -1;
   String ap_config = "";
   String temp_ap_name = "";
   for (int i = 0; i < access_points->size(); i++) {
     if (access_points->get(i).selected) {
       temp_ap_name = access_points->get(i).essid;
+      targ_ap_index = i;
       break;
     }
   }
@@ -269,11 +299,26 @@ bool EvilPortal::setAP(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_
     strncpy(apName, ap_config.c_str(), MAX_AP_NAME_SIZE);
     this->has_ap = true;
     Serial.println("ap config set");
+    this->ap_index = targ_ap_index;
     return true;
   }
   else
     return false;
 
+}
+
+bool EvilPortal::setAP(String essid) {
+  if (essid == "")
+    return false;
+
+  if (essid.length() > MAX_AP_NAME_SIZE) {
+    return false;
+  }
+
+  strncpy(apName, essid.c_str(), MAX_AP_NAME_SIZE);
+  this->has_ap = true;
+  Serial.println("ap config set");
+  return true;
 }
 
 void EvilPortal::startAP() {
